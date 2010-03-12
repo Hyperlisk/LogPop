@@ -2,7 +2,7 @@
 
 $lp->funcs['loadAccess'] = function() use (&$lp){
   if(!file_exists(CORE_DIR.'access.ser')){
-    $lp->setAccess('Hyperlisk',999);
+    $lp->setAccess($lp->config['core'][0]['owner'],999);
   }
   $lp->access = unserialize(file_get_contents(CORE_DIR.'access.ser'));
 };
