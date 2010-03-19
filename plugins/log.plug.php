@@ -6,10 +6,11 @@ if(!defined('LOG_FILE')){
 
 $lp->funcs['seenUpdate'] = function($message,$type) use (&$lp){
     $seen = $lp->plugVarGet('_LOG_PLUG','seen');
-    if(!isset($seen[$message->channel])){
-      $seen[$message->username] = array();
+    $username = strtolower($message->username);
+    if(!isset($seen[$username])){
+      $seen[$username] = array();
     }
-    $seen[$message->username][] = array(time(),$type,$message->data,$message->channel);
+    $seen[$username][] = array(time(),$type,$message->data,$message->channel);
     file_put_contents(PLUGIN_DIR.LOG_FILE,serialize($seen));
     $lp->plugVarSet('_LOG_PLUG','seen',$seen);
 };
@@ -52,7 +53,7 @@ $plugins = array(
     }
   }),
   array('trigger', 'seen', 'func', function($args,$message){
-    $from = $message->username;
+    $from = strtolower($message->username);
     $find = $args[0];
     $channel = $message->channel;
     if($find == $message->logpop->getUsername()){
@@ -91,16 +92,16 @@ $plugins = array(
         $str = "I last saw $find joining $channel at $date.";
         break;
       case 'PART':
-        $str = "I last saw $find leaving $channel. ($data)";
+        $str = "I last saw $find leaving $channel at $date. ($data)";
         break;
       case 'QUIT':
-        $str = "I last saw $find quitting IRC. ($data)";
+        $str = "I last saw $find quitting IRC at $date. ($data)";
         break;
       case 'NICK':
         $str = "I last saw $find changing their nick to $data at $date.";
         break;
     }
-    $message->logpop->sendToChannel($channel,$str);
+    $message->logpop->sendToChannel($channel,"{$message->username}: $str");
     if($type == 'NICK'){
       $m = new Message(":{$message->username}!{$message->realname}@{$message->host} PRIVMSG {$message->channel} :.seen $data\r\n",$message->logpop);
       $message->logpop->runMessage($m);

@@ -21,7 +21,7 @@ $lp->funcs['run'] = function() use (&$lp){
   
 $lp->funcs['runTrigger'] = function($trigger,$message) use (&$lp){
   $test = $lp->plugVarGet('_CORE_IDENTITY',$message->username);
-  if(empty($test)){
+  if(empty($test) && isset($plugin[2]) && $plugin[2]){
     $lp->verifyIdentity($trigger,$message);
   } else {
     $lp->runIt('trigger','system_triggers',$trigger,$message);
